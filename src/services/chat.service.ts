@@ -1,108 +1,69 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { resetFakeAsyncZone } from '@angular/core/testing';
 import { Observable } from 'rxjs';
+import * as signalR from '@microsoft/signalr';
 
-export const api: string = "";
+export const api: string = "http://localhost:5038/api";
 
-export interface User {
-  Id: string,
-  FirstName: string,
-  LastName: string,
-  Email: string,
-  Role: UserRole,
-  CreatedAt: Date,
-  Photos: ProfilePhoto[],
-  Messages: Message[]
-}
-
-export enum UserRole{
-  Unknown = 0,
-  User = 1,
-  Admin = 2,
-  SuperAdmin = 3,
-}
-
-export interface ProfilePhoto{
-  Id: string,
-  UserId: string,
-  PhotoName: string,
-  CreatedAt: Date
-}
-
-export interface Message{
-  Id: string,
-  SenderId: string,
-  ChatId: string,
-  Msg: string,
-  IsSeen: boolean,
-  SeenAt: Date,
-  CreatedAt: Date
-}
-
-export interface Chat{
-  Id: string,
-  CreatedAt: Date,
-  Messages: Message[]
-}
-
-export interface LoginDto{
-  Email: string,
-  Password: string
-}
-
-export interface RegisterDto{
-  FirstName: string,
-  LastName: string,
-  Email: string,
-  ConfirmCode: string,
-  Password: string,
-  ConfirmPassword: string,
-  Photo: File
-}
-
-export interface ChangePasswordDto{
-  Email: string,
-  OldPassword: string,
-  NewPassword: string,
-  ConfirmPassword: string
-}
-
-export interface ResetPasswordDto{
-  Email: string,
-  NewPassword: string,
-  ConfirmNewPassword: string,
-  ConfirmationCode: string
-}
-
-export interface SendConfirmCodeDto{
-  Email: string
-}
-
-export interface LoginViewModel{
-  User: User,
-  AccessToken: string
+export interface Use {
+  name: string;
 }
 
 @Injectable({
   providedIn: 'root'
 })
+
 export class ChatService {
 
-  constructor(private http: HttpClient) { }
+  public connection: signalR.HubConnection;
 
-  public Login(loginDto: LoginDto){
-    this.http.post(api, loginDto);
+  constructor() {
+    this.connection = new signalR.HubConnectionBuilder()
+      .withUrl("http://localhost:5038/chat")
+      .configureLogging(signalR.LogLevel.Information)
+      .build();
+
+    this.connection.on('ReceiveMessage', (senderId: string, receiverId: string, message: string) => {
+      console.log(senderId, receiverId, message);
+    });
+
+    this.connection.on("Connected", (user: Use) => {
+      console.log(`${user.name} has joined the chat.`);
+    });
+
+    this.connection.on("Disconnected", (user: Use) => {
+      console.log(`${user.name} has left the chat.`);
+    });
   }
 
-  private formatDate(date: Date): string {
-    const options: Intl.DateTimeFormatOptions = {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-    };
-    return date.toLocaleDateString('en-US', options);
+  public async start() {
+    try {
+      await this.connection.start();
+      console.log("SignalR connected.");
+    } catch (error) {
+      console.log("SignalR connection error: ", error);
+      setTimeout(() => this.start(), 5000);
+    }
   }
+
+  public addReceiveMessageListener(callback: (user: string, message: string) => void): void {
+    this.connection.on('ReceiveMessage', (user, message) => {
+      callback(user, message);
+    });
+  }
+
+  public sendMessage(toUserId: string, fromUserId: string, message: string): void {
+    console.log("SendMessage");
+    this.connection.invoke('SendMessage', toUserId, fromUserId, message)
+      .catch(err => console.error(err));
+  }
+
+  public async register(user: Use) {
+    try {
+      await this.connection.send("Register", user);
+    } catch (error) {
+      console.error("Register user error: ", error);
+    }
+  }
+
 }

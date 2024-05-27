@@ -4,14 +4,18 @@
         <div class="circle circle-one"></div>
         <div class="form-container">
             <h1 class="opacity">Register</h1>
-            <form>
-              <input type="text" placeholder="FirstName" />
-                <input type="text" placeholder="LastName" />
-                <input type="text" placeholder="Email" />
-                <button class="opacity" (click)="sendConfirmCode()">Send Confirmation Code</button>
-                <input type="text" placeholder="Confirmation Code"/>
-                <input type="password" placeholder="Password" />
-                <input type="password" placeholder="Confirm Password" />
+            <form [formGroup]="registerForm">
+                <input type="text" formControlName="Email" placeholder="Email" required />
+                <!-- <mat-progress-bar mode="indeterminate"></mat-progress-bar> -->
+                <button class="opacity" (click)="sendConfirmCode()" [disabled]="registerForm.get('Email')?.invalid">Send Confirmation Code</button>
+                <input type="text" formControlName="ConfirmCode" placeholder="Confirmation Code" required/>
+                <mat-spinner *ngIf="proccessing"></mat-spinner>
+                <input type="text" formControlName="FirstName" placeholder="FirstName" required />
+                <input type="text" formControlName="LastName" placeholder="LastName" required/>
+                <input type="password" formControlName="Password" placeholder="Password" required/>
+                <input type="password" formControlName="ConfirmPassword" placeholder="Confirm Password" required/>
+                <label for="avatar">Photo:</label>
+                <input type="file" (change)="onFileSelected($event)" accept="image/png, image/jpeg" placeholder="Photo"/>
                 <button class="opacity" (click)="clickRegister()">Register</button>
             </form>
         </div>

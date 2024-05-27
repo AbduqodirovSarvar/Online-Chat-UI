@@ -4,12 +4,13 @@
         <div class="circle circle-one"></div>
         <div class="form-container">
             <h1 class="opacity">Reset Password</h1>
-            <form>
-                <input type="text" placeholder="Email" />
-                <button class="opacity" (click)="sendResetCode()">Send Confirmation Code</button>
-                <input type="text" placeholder="Confirmation Code"/>
-                <input type="password" placeholder="New Password" />
-                <input type="password" placeholder="Confirm the new password" />
+            <form [formGroup]="resetForm">
+                <input type="text" placeholder="Email" formControlName="Email" required="true"/>
+                <button class="opacity" (click)="sendResetCode()" [disabled]="resetForm.get('Email')?.invalid">Send Confirmation Code</button>
+                <input type="text" placeholder="Confirmation Code" formControlName="ConfirmationCode"/>
+                <input type="password" placeholder="New Password" formControlName="NewPassword"/>
+                <input type="password" placeholder="Confirm the new password" formControlName="ConfirmNewPassword"/>
+                <mat-spinner *ngIf="proccessing"></mat-spinner>
                 <button class="opacity" (click)="clickResetPassword()">Reset Password</button>
             </form>
         </div>
