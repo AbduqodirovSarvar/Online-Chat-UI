@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ApiService, ResetPasswordDto } from '../services/api.service';
+import { ApiService } from '../services/api.service';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import { CommonModule } from '@angular/common';
+import { ResetPasswordRequest } from '../data/DataTypes';
 
 @Component({
   selector: 'app-reset',
@@ -31,11 +32,11 @@ export class ResetComponent {
 
   proccessing: boolean = false;
 
-  resetPasswordDto: ResetPasswordDto ={
-    Email: '',
-    ConfirmationCode: '',
-    NewPassword: '',
-    ConfirmNewPassword: ''
+  resetPasswordDto: ResetPasswordRequest ={
+    email: '',
+    newPassword: '',
+    confirmNewPassword: '',
+    confirmationCode: 0
   };
 
   constructor(
@@ -47,9 +48,9 @@ export class ResetComponent {
       return;
     }
 
-    this.resetPasswordDto.ConfirmationCode = this.resetForm.get('ConfirmationCode')?.value;
-    this.resetPasswordDto.NewPassword = this.resetForm.get('NewPassword')?.value;
-    this.resetPasswordDto.ConfirmNewPassword = this.resetForm.get('ConfirmNewPassword')?.value;
+    this.resetPasswordDto.confirmationCode = this.resetForm.get('ConfirmationCode')?.value;
+    this.resetPasswordDto.newPassword = this.resetForm.get('NewPassword')?.value;
+    this.resetPasswordDto.confirmNewPassword = this.resetForm.get('ConfirmNewPassword')?.value;
 
     try {
       const response = await this.apiService.resetPassword(this.resetPasswordDto).toPromise();
@@ -68,9 +69,9 @@ export class ResetComponent {
       return;
     }
     this.proccessing = true;
-    this.resetPasswordDto.Email = this.resetForm.get('Email')?.value;
-    if (this.resetPasswordDto.Email) {
-      this.apiService.sendResetConfirmationCode({ email: this.resetPasswordDto.Email }).subscribe(
+    this.resetPasswordDto.email = this.resetForm.get('Email')?.value;
+    if (this.resetPasswordDto.email) {
+      this.apiService.sendResetConfirmationCode({ email: this.resetPasswordDto.email }).subscribe(
         () =>{
           this.proccessing = false;
           console.log('Reset code sent')

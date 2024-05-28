@@ -2,70 +2,24 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, catchError, tap } from 'rxjs';
 import { Router } from '@angular/router';
+import {
+  User,
+  Role,
+  Message,
+  RegisterRequest,
+  LoginRequest,
+  LoginResponse,
+  ResetPasswordRequest,
+  ChangePasswordRequest,
+  SendConfirmationCodeRequest
+} from '../data/DataTypes';
 
-const api: string = "http://localhost:5038/api";
-const photoApi: string = "";
-const tokeen = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6ImY0NzcwZmE5LTlmYWItNDZiNy1hZGNmLTNlNmRkOTY0ZjdmZiIsImp0aSI6ImIxOTNiNGZmLWRhYTQtNDhmMC04MWE3LTg2N2U3ZDQ4N2VhZSIsIm5hbWUiOiIyNy8wNS8yMDI0IDA5OjIxOjExIiwiZXhwIjoxNzE2ODg4MDcxLCJpc3MiOiJsb2NhbGhvc3QiLCJhdWQiOiJsb2NhbGhvc3QifQ.2SD0jCLEr22kOSyVb1myz6zvjcH4544demUG2707Q28';
+const commonApi: string = "http://localhost:5038/api";
+const authApi: string = "http://localhost:5038/api/Auth";
+const messageApi: string = "http://localhost:5038/api/Message";
+const userApi: string = "http://localhost:5038/api/User";
+const storageApi: string = "http://localhost:5038/api/Storage";
 
-export interface RegisterDto {
-  FirstName: string;
-  LastName: string;
-  Email: string;
-  ConfirmCode: string;
-  Password: string;
-  ConfirmPassword: string;
-  Photo?: File | null;
-}
-
-export interface LoginDto {
-  Email: string;
-  Password: string;
-}
-
-export interface SendConfirmationCode {
-  email: string;
-}
-
-export interface ResetPasswordDto {
-  Email: string;
-  ConfirmationCode: string;
-  NewPassword: string;
-  ConfirmNewPassword: string;
-}
-
-export interface ChangePasswordDto {
-  email: string;
-  oldPassword: string;
-  newPassword: string;
-  confirmPassword: string;
-}
-
-export interface User{
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  passwordHash: string;
-  role: UserRole;
-  photoName?: string;
-  CreatedAt: Date,
-  messages: Message[],
-}
-
-export interface Message {
-  id: string;
-  senderId: string;
-  receiverId: string;
-  msg: string;
-  isSeen: boolean;
-  seenAt: Date;
-  CreatedAt: Date
-}
-
-export enum UserRole {
-  User = 'User',
-  Admin = 'Admin'
-}
 
 @Injectable({
   providedIn: 'root'
@@ -77,7 +31,19 @@ export class ApiService {
     private router: Router
   ) { }
 
-  register(registerDto: RegisterDto): Observable<any> {
+  // --> start Auth services
+
+  login(loginDto: LoginRequest): Observable<any> {
+    return this.http.post<any>(`${authApi}/login`, loginDto).pipe(
+      tap((response: LoginResponse) => {
+        if (response && response.accessToken) {
+          this.saveAccessToken(response.accessToken);
+        }
+      })
+    );
+  }
+
+  register(registerDto: RegisterRequest): Observable<any> {
     const formData: FormData = new FormData();
     formData.append('FirstName', registerDto.FirstName);
     formData.append('LastName', registerDto.LastName);
@@ -88,21 +54,11 @@ export class ApiService {
     if (registerDto.Photo) {
       formData.append('Photo', registerDto.Photo);
     }
-    return this.http.post<any>(`${api}/Auth/register`, formData);
+    return this.http.post<any>(`${authApi}/register`, formData);
   }
 
-  login(loginDto: LoginDto): Observable<any> {
-    return this.http.post<any>(`${api}/Auth/login`, loginDto).pipe(
-      tap(response => {
-        if (response && response.accessToken) {
-          this.saveAccessToken(response.accessToken);
-        }
-      })
-    );
-  }
-
-  sendConfirmationCode(sendConfirmationCode: SendConfirmationCode): Observable<any> {
-    return this.http.post(`${api}/Auth/send-code-for-confirm-email`, sendConfirmationCode)
+  sendConfirmationCode(sendConfirmationCode: SendConfirmationCodeRequest): Observable<any> {
+    return this.http.post(`${authApi}/send-confirmation-code-for-check-email`, sendConfirmationCode)
     .pipe(
       tap((res) => console.log(res)),
       catchError((error) => {
@@ -112,8 +68,8 @@ export class ApiService {
     );
   }
 
-  sendResetConfirmationCode(sendConfirmationCode: SendConfirmationCode): Observable<any> {
-    return this.http.post(`${api}/Auth/send-code-for-reset-password`, sendConfirmationCode)
+  sendResetConfirmationCode(sendConfirmationCode: SendConfirmationCodeRequest): Observable<any> {
+    return this.http.post(`${authApi}/send-confirmation-code-for-reset-password`, sendConfirmationCode)
     .pipe(
       tap((res) => console.log(res)),
       catchError((error) => {
@@ -123,69 +79,115 @@ export class ApiService {
     );
   }
 
-  resetPassword(resetPasswordDto: ResetPasswordDto): Observable<any> {
-    return this.http.post(`${api}/Auth/reset-password`, resetPasswordDto);
+  resetPassword(resetPasswordDto: ResetPasswordRequest): Observable<any> {
+    return this.http.post(`${authApi}/reset-password`, resetPasswordDto);
   }
 
-  changePassword(changePassordDto: ChangePasswordDto){
-    return this.http.put(`${api}/Auth/change-password`, changePassordDto);
+  changePassword(changePassordDto: ChangePasswordRequest){
+    return this.http.put(`${authApi}/change-password`, changePassordDto);
   }
+
+  // --> end Auth services
+
+
+  // --> start User services
 
   getCurrentUser(): Observable<User> {
-    // const headers = new HttpHeaders({
-    //   'Authorization': `Bearer ${this.getAccessToken()}`,
-    //   'Accept': 'application/json'
-    // });
-    console.log("CurrentUser:  ")
-    return this.http.get<User>(`${api}/Users/me`); //, {headers}
-  }
-
-  getUser(userId: string): Observable<User> {
     const headers = new HttpHeaders({
-      'Authorization': `Bearer ${tokeen}`,
+      'Authorization': `Bearer ${this.getAccessToken()}`,
       'Accept': 'application/json'
     });
-    let params = new HttpParams().set('id', userId).set('email', '');
+    return this.http.get<User>(`${userApi}/me`, {headers}).pipe(
+      catchError(error => this.handleError(error))
+    );
+  }
+
+  getUser(userId: string | null, email: string | null): Observable<User> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${this.getAccessToken()}`,
+      'Accept': 'application/json'
+    });
+    userId = userId ?? '';
+    email = email ?? '';
+    let params = new HttpParams().set('id', userId).set('email', email);
     console.log(params.get('id'));
-    return this.http.get<User>(`${api}/Users`, {headers: headers,params: params});
+    return this.http.get<User>(`${userApi}`, {headers: headers,params: params}).pipe(
+      catchError(error => this.handleError(error))
+    );
   }
 
   getUsers(searchText: string): Observable<User[]>{
     const headers = new HttpHeaders({
-      'Authorization': `Bearer ${tokeen}`,
+      'Authorization': `Bearer ${this.getAccessToken()}`,
       'Accept': 'application/json'
     });
     const params = new HttpParams();
     params.set('searchText', searchText);
-    return this.http.get<User[]>(`${api}/Users/all-users`, {headers, params});
+    return this.http.get<User[]>(`${userApi}/all`, {headers, params}).pipe(
+      catchError(error => this.handleError(error))
+      );
   }
 
   getAllChatUser(): Observable<User[]> {
     const headers = new HttpHeaders({
-      'Authorization': `Bearer ${tokeen}`,
+      'Authorization': `Bearer ${this.getAccessToken()}`,
       'Accept': 'application/json'
     });
-    return this.http.get<User[]>(`${api}/Users/my-chats`, {headers});
+    return this.http.get<User[]>(`${userApi}/my-chats`, {headers}).pipe(
+      catchError(error => this.handleError(error))
+    );
   }
 
   getAllMessagesForTheChat(userId: string): Observable<any> {
-    return this.http.get<any>(`${api}/chat-messages/${userId}`);
-  }
-
-  getPhoto(userId: string){
-    return this.http.get<any>(`${api}/Storage/${userId}`);
+    return this.http.get<any>(`${userApi}/chat-messages/${userId}`).pipe(
+      catchError(error => this.handleError(error))
+    );
   }
 
   editUser(newUserUpdateDto: object): Observable<any> {
-    return this.http.put<any>(`${api}/Users/update`, newUserUpdateDto);
+    return this.http.put<any>(`${userApi}/update`, newUserUpdateDto).pipe(
+      catchError(error => this.handleError(error))
+    );
   }
 
   deleteUser(userId: string){
-    return this.http.delete<any>(`${api}/Users/${userId}`);
+    return this.http.delete<any>(`${userApi}/${userId}`);
   }
 
   deleteUserPhoto(userId: string){
-    return this.http.delete<any>(`${api}/Users/photo/${userId}`);
+    return this.http.delete<any>(`${userApi}/photo/${userId}`);
+  }
+
+  // --> end User services
+
+  // --> start Storage services
+
+
+  getPhoto(userId: string){
+    return this.http.get<any>(`${storageApi}/${userId}`);
+  }
+
+  // --> end Storage services
+
+
+  // --> start Message services
+
+  markAsRead(userId: string): Observable<any> {
+    return this.http.put<any>(`${messageApi}`, userId).pipe(
+      catchError(error => this.handleError(error))
+    );
+  }
+
+  // --> end Message services
+
+  // --> start Other help services
+
+  handleError(error: any): Observable<any> {
+    if (error.status === 401) {
+      // Unauthorized error, redirect to login page
+      this.redirectToLoginPage();
+    }
+    return error;
   }
 
   redirectToLoginPage(){
@@ -198,7 +200,24 @@ export class ApiService {
   }
 
   getAccessToken(): string | null{
-    return localStorage.getItem('accessToken');
+    const token = localStorage.getItem('accessToken');
+    if(token && !this.isTokenExpired(token)){
+      return localStorage.getItem('accessToken');
+    }
+    else{
+      this.redirectToLoginPage();
+      return null;
+    }
+  }
+
+  private isTokenExpired(token: string): boolean {
+    if (!token) return true;
+
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const expiry = payload.exp;
+    const now = Math.floor((new Date).getTime() / 1000);
+
+    return now >= expiry;
   }
 
   removeAccessToken(): void{
@@ -216,4 +235,6 @@ export class ApiService {
   removeFromLocalStorage(key: string): void{
     localStorage.removeItem(key);
   }
+
+  // --> end Other help services
 }

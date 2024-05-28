@@ -1,11 +1,14 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { ChatService } from '../services/chat.service';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ApiService, RegisterDto, SendConfirmationCode } from '../services/api.service';
+import { ApiService } from '../services/api.service';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatProgressBarModule} from '@angular/material/progress-bar';
 import { CommonModule } from '@angular/common';
+import {
+   RegisterRequest,
+   SendConfirmationCodeRequest 
+  } from '../data/DataTypes';
 
 @Component({
   selector: 'app-register',
@@ -42,7 +45,7 @@ export class RegisterComponent {
     Photo: new FormControl<File | null>(null)
   });
 
-  registerDto: RegisterDto = {
+  registerDto: RegisterRequest = {
     FirstName: '',
     LastName: '',
     Email: '',
@@ -54,7 +57,7 @@ export class RegisterComponent {
 
   proccessing: boolean = false;
 
-  sendConfirmCodeDto: SendConfirmationCode = {
+  sendConfirmCodeDto: SendConfirmationCodeRequest = {
     email: ''
   }
 

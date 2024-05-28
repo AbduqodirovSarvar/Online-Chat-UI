@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { ApiService, LoginDto } from '../services/api.service';
+import { ApiService } from '../services/api.service';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import { CommonModule } from '@angular/common';
+import { LoginRequest } from '../data/DataTypes';
 
 @Component({
   selector: 'app-login',
@@ -14,9 +15,9 @@ import { CommonModule } from '@angular/common';
 })
 export class LoginComponent {
 
-  loginDto: LoginDto = {
-    Email: '',
-    Password: ''
+  loginDto: LoginRequest = {
+    email: '',
+    password: ''
   };
 
   proccessing: boolean = false;
@@ -49,8 +50,8 @@ export class LoginComponent {
     }
     this.proccessing = true;
 
-    this.loginDto.Email = this.loginForm.get('Email')?.value;
-    this.loginDto.Password = this.loginForm.get('Password')?.value;
+    this.loginDto.email = this.loginForm.get('Email')?.value;
+    this.loginDto.password = this.loginForm.get('Password')?.value;
 
     try {
       const response = await this.apiService.login(this.loginDto).toPromise();

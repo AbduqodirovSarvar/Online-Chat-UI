@@ -11,16 +11,18 @@ import {
   Validators,
   FormsModule,
   ReactiveFormsModule,
-  FormGroup,
+  FormGroup
 } from '@angular/forms';
 import {ErrorStateMatcher} from '@angular/material/core';
 import {MatInputModule} from '@angular/material/input';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatIconModule} from '@angular/material/icon';
-import { ChatService, api } from '../services/chat.service';
 import { Router } from '@angular/router';
 import { Userr, mockUsers } from '../services/mockData';
-import { ApiService, Message, User } from '../services/api.service';
+import { ApiService} from '../services/api.service';
+import { SignalRService } from '../services/signal-r.service';
+import { Message, User } from '../data/DataTypes';
+import {MatBadgeModule} from '@angular/material/badge';
 
 @Component({
   selector: 'app-chat',
@@ -38,7 +40,8 @@ import { ApiService, Message, User } from '../services/api.service';
     MatIconModule,
     MatListModule,
     ReactiveFormsModule,
-    FormsModule
+    FormsModule,
+    MatBadgeModule
   ],
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.scss'
@@ -46,7 +49,7 @@ import { ApiService, Message, User } from '../services/api.service';
 
 export class ChatComponent implements OnInit {
   currentUser: User = {} as User;
-  users: User[] = []; //mockUsers;
+  users: User[] = [];
   user: User = {} as User;
   messages: Message[] = [];
 
@@ -56,68 +59,76 @@ export class ChatComponent implements OnInit {
   });
 
   constructor(
-    private chatService: ChatService,
+    private signalRService: SignalRService,
     private router: Router,
     private apiService: ApiService
   ) {}
 
   ngOnInit(): void {
-    this.chatService.start();
-    this.refleshMessages();
-    this.chatForm.get('searchText')?.valueChanges.subscribe(result => {
-      this.getUsers();
-    });
-    this.apiService.getCurrentUser().subscribe(
-      (response: User) => {
-        console.log(response);
-      this.currentUser = response;
-      console.log('Current user:', this.currentUser);
-    },
-    (error) => {
-      console.error('Error fetching current user:', error);
-    });
+    this.refleshChatPage();
+    this.user = this.users[0] ?? {};
+    this.signalRService.startConnection();
   }
 
   sendMessage(): void {
     if (this.chatForm.get('message')?.value.trim() === '') {
       return;
     }
-    this.chatService.sendMessage('1', '2', this.chatForm.get('message')?.value);
-    this.refleshMessages();
+    this.signalRService.sendMessage(this.user.id, this.chatForm.get('message')?.value);
     this.chatForm.get('message')?.setValue('');
+    // this.apiService.getUser(this.user.id, null).subscribe({
+    //   next: (response)=>{
+    //       this.user = response;
+    //       this.messages = this.user?.messages;
+    //       console.log(this.messages);
+    //   },
+    //   error:(err:Error)=>{
+    //     console.log(err.message);
+    //   }
+    // });
+    this.refleshChatPage();
   }
 
-  refleshMessages(){
-    if(!this.user){
-      console.log("user not found");
-      return;
-    }
-    if(!this.user?.messages){
-      return;
-    }
-    this.messages = this.user?.messages
-                              .sort((a, b) => {
-                                const dateA = new Date(a.CreatedAt);
-                                const dateB = new Date(b.CreatedAt);
+  refleshChatPage(){
+    this.apiService.getCurrentUser().subscribe({
+      next: (response)=>{
+          this.currentUser = response;
+          console.log(`Current User: ${this.currentUser}`);
+      },
+      error:(err:Error)=>{
+        console.log(err.message);
+      }
+    });
 
-                                if (dateA < dateB) {
-                                  return -1;
-                                } else if (dateA > dateB) {
-                                  return 1;
-                                } else {
-                                  return 0;
-                                }
-                              })
-                              .reverse();
+    this.apiService.getUsers('').subscribe({
+      next: (response: User[])=>{
+        this.users = response;
+        console.log(`Users: ${this.users}`);
+      },
+      error:(err:Error)=>{
+        console.log(err.message);
+      }
+    });
+
+    this.apiService.getUser(this.user.id, null).subscribe({
+      next: (response: User)=>{
+          this.user = response;
+          this.messages = this.user?.messages;
+          console.log(`User: ${this.user}`);
+          console.log(`Messages: ${this.messages}`);
+      },
+      error:(err:Error)=>{
+        console.log(err.message);
+      }
+    });
   }
 
   chooseUser(userId: string): void {
     console.log(userId);
-    this.apiService.getUser(userId).subscribe({
-      next: (a)=>{
-          this.user = a;
-          console.log(this.user);
-          this.refleshMessages();
+    this.apiService.getUser(userId, null).subscribe({
+      next: (response)=>{
+          this.user = response;
+          this.messages = this.user?.messages;
       },
       error:(err:Error)=>{
         console.log(err.message);
@@ -126,6 +137,7 @@ export class ChatComponent implements OnInit {
   }
 
   getUsers(){
+    console.log("this");
     if(this.chatForm.get('searchText')?.value){
       this.apiService.getUsers(this.chatForm.get('searchText')?.value).subscribe(
         (response: User[]) => {
@@ -134,11 +146,17 @@ export class ChatComponent implements OnInit {
       );
     }
     else{
-      this.apiService.getAllChatUser().subscribe(
+      console.log("this");
+      this.apiService.getUsers('').subscribe(
         (response: User[]) => {
-          this.users = response;
+          this.users = response
         }
       );
+      // this.apiService.getAllChatUser().subscribe(
+      //   (response: User[]) => {
+      //     this.users = response;
+      //   }
+      // );
     }
   }
 
@@ -151,6 +169,7 @@ export class ChatComponent implements OnInit {
     logOut(){
     this.router.navigate(['/login']);
     localStorage.removeItem('accessToken');
+    this.signalRService.stopConnection();
   }
 
 }

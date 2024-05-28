@@ -31,7 +31,9 @@
           </div>
           <div class="discussions_users">
             <mat-list *ngFor="let u of users">
-              <mat-list-item (click)="chooseUser(u.id)">
+              <mat-list-item
+               (click)="chooseUser(u.id)"
+               >
                 <img src="../assets/images/cropped-IMG_2512 (2).JPG" alt="img" style="margin-right: 20px;">
                  {{u.firstName}}
               </mat-list-item>
@@ -52,7 +54,7 @@
         <div class="chat_header">
           <div class="chat_header_item">
             <img src="../assets/images/cropped-IMG_2512 (2).JPG" alt="user image" style="width: 50px; border-radius: 100%;">
-            <h3 style="margin: 10px 10px 10px 20px;">Firstname Lastname </h3>
+            <h3 style="margin: 10px 10px 10px 20px;">{{user.firstName}} {{user.lastName}}</h3>
           </div>
         </div>
         <div class="messages">
