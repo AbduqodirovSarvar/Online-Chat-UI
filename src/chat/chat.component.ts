@@ -14,6 +14,8 @@ import { SignalRService } from '../services/signal-r.service';
 import { MarkAsReadRequest, Message, User } from '../data/DataTypes';
 import { MatBadgeModule } from '@angular/material/badge';
 import { Subscription } from 'rxjs';
+import { MatDialog } from '@angular/material/dialog';
+import { UserSettingsDialogComponent } from '../user-settings-dialog/user-settings-dialog.component';
 
 @Component({
   selector: 'app-chat',
@@ -40,6 +42,7 @@ export class ChatComponent implements OnInit {
   user: User = {} as User;
   messages: Message[] = [];
   messageSubscription!: Subscription;
+  storageAp: string = "http://localhost:5038/api/Storage";
 
   chatForm: FormGroup = new FormGroup({
     message: new FormControl('', Validators.required),
@@ -49,7 +52,8 @@ export class ChatComponent implements OnInit {
   constructor(
     private signalRService: SignalRService,
     private router: Router,
-    private apiService: ApiService
+    private apiService: ApiService,
+    private dialog: MatDialog
   ) {}
 
   async ngOnInit() {
@@ -64,6 +68,19 @@ export class ChatComponent implements OnInit {
     }
     this.setupSearchTextHandler();
     this.setupSignalRConnection();
+  }
+
+  openUpdateUserDialog(){
+    this.dialog.open(UserSettingsDialogComponent).afterClosed().subscribe({
+      next: async () => {
+        await this.loadCurrentUser();
+        await this.loadAllChatUsers();
+        await this.chooseUser(this.user.id);
+      },
+      error: (error: Error) => {
+        this.apiService.handleError(error);
+      }
+    });
   }
 
   private loadCurrentUser(): Promise<void> {
@@ -86,6 +103,7 @@ export class ChatComponent implements OnInit {
       this.apiService.getAllChatUsers().subscribe({
         next: (users: User[]) => {
           this.users = users;
+          console.log(this.users);
           resolve();
         },
         error: (error) => {

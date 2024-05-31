@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
-import { User, RegisterRequest, LoginRequest, LoginResponse, ResetPasswordRequest, ChangePasswordRequest, SendConfirmationCodeRequest, MarkAsReadRequest } from '../data/DataTypes';
+import { User, RegisterRequest, LoginRequest, LoginResponse, ResetPasswordRequest, ChangePasswordRequest, SendConfirmationCodeRequest, MarkAsReadRequest, UpdateUserRequest } from '../data/DataTypes';
 
 const commonApi: string = "http://localhost:5038/api";
 const authApi: string = "http://localhost:5038/api/Auth";
@@ -19,7 +19,6 @@ export class ApiService {
     private http: HttpClient,
     private router: Router
   ) { }
-
   // --> start Auth services
 
   login(loginDto: LoginRequest): Observable<LoginResponse> {
@@ -111,13 +110,25 @@ export class ApiService {
     return this.http.get<any>(`${userApi}/chat-messages/${userId}`, { headers });
   }
 
-  editUser(newUserUpdateDto: object): Observable<any> {
+  editUser(userUpdateDto: UpdateUserRequest): Observable<any> {
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${this.getAccessToken()}`,
       'Accept': 'application/json'
     });
 
-    return this.http.put<any>(`${userApi}/update`, newUserUpdateDto, { headers });
+    const formData: FormData = new FormData();
+    formData.append("Id", userUpdateDto.id);
+    if(userUpdateDto.firstName){
+      formData.append("firstName", userUpdateDto.firstName);
+    }
+    if(userUpdateDto.lastName){
+      formData.append("LastName", userUpdateDto.lastName);
+    }
+    if(userUpdateDto.photo){
+      formData.append("Photo", userUpdateDto.photo);
+    }
+
+    return this.http.put<any>(`${userApi}/update`, formData, { headers });
   }
 
   deleteUser(userId: string): Observable<any> {
@@ -142,8 +153,8 @@ export class ApiService {
 
   // --> start Storage services
 
-  getPhoto(userId: string): Observable<any> {
-    return this.http.get<any>(`${storageApi}/${userId}`);
+  getPhoto(fileName: string): Observable<any> {
+    return this.http.get<any>(`${storageApi}/${fileName}`);
   }
 
   // --> end Storage services
@@ -171,6 +182,11 @@ export class ApiService {
     }
     console.error('An error occurred:', error);
     throw error;
+  }
+
+  checkForStrongPassword(password: string){
+    const strongPasswordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    return strongPasswordPattern.test(password);
   }
 
   redirectToLoginPage(): void {

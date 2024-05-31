@@ -21,6 +21,7 @@ export interface User {
   role: Role;
   createdAt: string;
   isDeleted: boolean;
+  photoName?: string | null;
   unReadedMessageCount: number;
   messages: Message[];
 }

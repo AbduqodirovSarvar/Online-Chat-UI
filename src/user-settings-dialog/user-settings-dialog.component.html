@@ -1,3 +1,32 @@
-<div>
-  
-</div>
+<h2 mat-dialog-title>Update Information</h2>
+<mat-dialog-content>
+  <form class="update-form" [formGroup]="updateUserForm">
+    <mat-form-field class="update-full-width">
+      <mat-label>First Name</mat-label>
+      <input matInput formControlName="firstName" placeholder="Text">
+    </mat-form-field>
+    <mat-form-field class="update-full-width">
+      <mat-label>Last Name</mat-label>
+      <input matInput formControlName="lastName" placeholder="Text">
+    </mat-form-field>
+    <mat-form-field class="update-full-width">
+      <mat-label>New Password</mat-label>
+      <input matInput formControlName="newPassword" placeholder="If you don't change the password, leave this empty" type="password">
+    </mat-form-field>
+    <mat-form-field class="update-full-width" *ngIf="changingPassword">
+      <mat-label>Confirm New Password</mat-label>
+      <input matInput formControlName="confirmPassword" placeholder="Password" required="true" type="password">
+    </mat-form-field>
+    <mat-form-field class="update-full-width" *ngIf="changingPassword">
+      <mat-label>Old Password</mat-label>
+      <input matInput formControlName="oldPassword" placeholder="Password" required="true" type="password">
+    </mat-form-field>
+    <label for="avatar">Photo: </label>
+    <input type="file" (change)="onFileSelected($event)" accept="image/png, image/jpeg" />
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions>
+  <button mat-button mat-dialog-close>Cancel</button>
+  <button mat-button [disabled]="!updateUserForm.valid" (click)="onClickSave()" cdkFocusInitial>Save</button>
+</mat-dialog-actions>
+<button mat-flat-button color="warn" (click)="onClickDeleteAccount()">Delete my account</button>

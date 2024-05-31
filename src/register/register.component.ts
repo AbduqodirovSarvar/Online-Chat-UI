@@ -1,14 +1,10 @@
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
-import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormControl, FormGroup, FormsModule, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { ApiService } from '../services/api.service';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { CommonModule } from '@angular/common';
-import {
-   RegisterRequest,
-   SendConfirmationCodeRequest
-  } from '../data/DataTypes';
+import { RegisterRequest, SendConfirmationCodeRequest } from '../data/DataTypes';
 
 @Component({
   selector: 'app-register',
@@ -19,29 +15,7 @@ import {
 })
 export class RegisterComponent {
 
-  constructor(private apiService: ApiService) { }
-
-  registerForm: FormGroup = new FormGroup({
-    FirstName: new FormControl(null, {
-      validators: [Validators.required]
-    }),
-    LastName: new FormControl(null, {
-      validators: [Validators.required]
-    }),
-    Email: new FormControl(null, {
-      validators: [Validators.required, Validators.email]
-    }),
-    ConfirmCode: new FormControl(null, {
-      validators: [Validators.required]
-    }),
-    Password: new FormControl(null, {
-      validators: [Validators.required]
-    }),
-    ConfirmPassword: new FormControl(null, {
-      validators: [Validators.required]
-    }),
-    Photo: new FormControl<File | null>(null)
-  });
+  registerForm: FormGroup;
 
   registerDto: RegisterRequest = {
     FirstName: '',
@@ -57,7 +31,44 @@ export class RegisterComponent {
 
   sendConfirmCodeDto: SendConfirmationCodeRequest = {
     email: ''
+  };
+
+  constructor(private apiService: ApiService) {
+    this.registerForm = new FormGroup({
+      FirstName: new FormControl(null, [Validators.required]),
+      LastName: new FormControl(null, [Validators.required]),
+      Email: new FormControl(null, [Validators.required, Validators.email]),
+      ConfirmCode: new FormControl(null, [Validators.required]),
+      Password: new FormControl(null, [Validators.required]),
+      ConfirmPassword: new FormControl(null, [Validators.required]),
+      Photo: new FormControl<File | null>(null),
+    }, { validators: this.passwordValidator });
   }
+
+  passwordValidator: ValidatorFn = (group: AbstractControl): ValidationErrors | null => {
+    const password = group.get('Password')?.value;
+    const confirmPassword = group.get('ConfirmPassword')?.value;
+
+    const passwordErrors: ValidationErrors = {};
+
+    if (password) {
+      // Check for required fields
+      if (!confirmPassword) {
+        passwordErrors['confirmPasswordRequired'] = true;
+      }
+
+      if (!this.apiService.checkForStrongPassword(password)) {
+        passwordErrors['weakPassword'] = true;
+      }
+
+      // Check if passwords match
+      if (confirmPassword && password !== confirmPassword) {
+        passwordErrors['passwordsMismatch'] = true;
+      }
+    }
+
+    return Object.keys(passwordErrors).length > 0 ? passwordErrors : null;
+  };
 
   async clickRegister() {
     if (this.registerForm.invalid) {
@@ -70,19 +81,23 @@ export class RegisterComponent {
     this.registerDto.LastName = this.registerForm.get('LastName')?.value;
     this.registerDto.Password = this.registerForm.get('Password')?.value;
     this.registerDto.ConfirmPassword = this.registerForm.get('ConfirmPassword')?.value;
-    if (this.registerForm.get("Photo")?.value) {
-      this.registerDto.Photo = this.registerForm.get("Photo")?.value;
+    if (this.registerForm.get('Photo')?.value) {
+      this.registerDto.Photo = this.registerForm.get('Photo')?.value;
     }
 
     try {
-      const response = await this.apiService.register(this.registerDto);
-      console.log('Response:', response);
-      this.apiService.redirectToLoginPage();
+      this.apiService.register(this.registerDto).subscribe({
+        next: () => {
+          this.apiService.redirectToLoginPage();
+        },
+        error: (error: Error) => {
+          this.apiService.handleError(error);
+        }
+      });
     } catch (error) {
       console.error('Error:', error);
     }
   }
-
 
   async sendConfirmCode() {
     if (!this.registerForm.get('Email')?.value) {
@@ -92,12 +107,17 @@ export class RegisterComponent {
     this.sendConfirmCodeDto.email = this.registerForm.get('Email')?.value;
     console.log(this.sendConfirmCodeDto);
     try {
-      const response = await this.apiService.sendConfirmationCode(this.sendConfirmCodeDto);
-      console.log('Response:', response);
-      this.processing = false;
+      this.apiService.sendConfirmationCode(this.sendConfirmCodeDto).subscribe({
+        next: () => {
+          this.processing = false;
+        },
+        error: (error: Error) => {
+          this.apiService.handleError(error);
+        }
+      });
     } catch (error) {
       this.processing = false;
-      console.error("Error", error);
+      console.error('Error:', error);
     }
   }
 
@@ -107,5 +127,4 @@ export class RegisterComponent {
       this.registerForm.get('Photo')?.setValue(selectedFile);
     }
   }
-
 }

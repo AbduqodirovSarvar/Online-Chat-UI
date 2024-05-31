@@ -6,7 +6,7 @@
     <div class="menu">
       <div class="item-top">
         <img
-          src="../assets/images/cropped-IMG_2512 (2).JPG"
+          src="{{storageAp}}/{{currentUser.photoName}}"
           alt="img"
           style="width: 50px; margin-top: 5px"
         />
@@ -15,7 +15,7 @@
               </div> -->
       </div>
       <div class="item-bottom">
-        <div class="item">
+        <div class="item" (click)="openUpdateUserDialog()">
           <mat-icon>settings</mat-icon>
         </div>
         <div class="item" (click)="logOut()">
@@ -41,8 +41,7 @@
           <div style="display: flex">
             <mat-list-item (click)="chooseUser(u.id)">
               <img
-                src="../assets/images/cropped-IMG_2512 (2).JPG"
-                alt="img"
+                src="{{storageAp}}/{{u.photoName}}" alt="img"
                 style="margin-right: 20px"
               />
               {{ u.firstName }}
@@ -80,7 +79,7 @@
     <div class="chat_header">
       <div class="chat_header_item">
         <img
-          src="../assets/images/cropped-IMG_2512 (2).JPG"
+          src="{{storageAp}}/{{user.photoName}}"
           alt="user image"
           style="width: 50px; border-radius: 100%"
         />
@@ -92,14 +91,24 @@
     <div class="messages">
       <div class="message" *ngFor="let item of messages">
         <div *ngIf="item.senderId != user?.id; else receiver">
-          <p class="message_rigt">
-            {{ item.msg }}
-          </p>
+          <div class="message_rigt">
+            <p style="margin-right: 20px;margin-top:5px;">
+              {{item.msg}}
+            </p>
+            <p style="margin-right: 10px;margin-top:5px;">
+              {{item.createdAt | date: 'dd/MM/yyyy HH:mm'}}
+            </p>
+          </div>
         </div>
         <ng-template #receiver>
-          <p class="message_left">
-            {{ item.msg }}
-          </p>
+          <div class="message_left">
+            <p style="margin-left: 20px;margin-top:5px;">
+              {{item.msg}}
+            </p>
+            <p style="margin-left: 10px;margin-top:5px;">
+              {{item.createdAt | date: 'dd/MM/yyyy HH:mm'}}
+            </p>
+          </div>
         </ng-template>
       </div>
     </div>
