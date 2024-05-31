@@ -62,3 +62,14 @@ export interface ChangePasswordRequest {
 export interface SendConfirmationCodeRequest {
   email: string;
 }
+
+export interface MarkAsReadRequest {
+  userId: string;
+}
+
+export interface UpdateUserRequest {
+  id: string;
+  firstName?: string | null;
+  lastName?: string | null;
+  photo?: string | null;
+}

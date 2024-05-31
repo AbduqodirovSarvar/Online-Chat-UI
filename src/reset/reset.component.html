@@ -10,7 +10,7 @@
                 <input type="text" placeholder="Confirmation Code" formControlName="ConfirmationCode"/>
                 <input type="password" placeholder="New Password" formControlName="NewPassword"/>
                 <input type="password" placeholder="Confirm the new password" formControlName="ConfirmNewPassword"/>
-                <mat-spinner *ngIf="proccessing"></mat-spinner>
+                <mat-spinner *ngIf="processing"></mat-spinner>
                 <button class="opacity" (click)="clickResetPassword()">Reset Password</button>
             </form>
         </div>

@@ -9,7 +9,7 @@
                 <!-- <mat-progress-bar mode="indeterminate"></mat-progress-bar> -->
                 <button class="opacity" (click)="sendConfirmCode()" [disabled]="registerForm.get('Email')?.invalid">Send Confirmation Code</button>
                 <input type="text" formControlName="ConfirmCode" placeholder="Confirmation Code" required/>
-                <mat-spinner *ngIf="proccessing"></mat-spinner>
+                <mat-spinner *ngIf="processing"></mat-spinner>
                 <input type="text" formControlName="FirstName" placeholder="FirstName" required />
                 <input type="text" formControlName="LastName" placeholder="LastName" required/>
                 <input type="password" formControlName="Password" placeholder="Password" required/>

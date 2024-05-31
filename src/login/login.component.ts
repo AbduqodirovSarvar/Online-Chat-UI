@@ -4,7 +4,7 @@ import { ApiService } from '../services/api.service';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import { CommonModule } from '@angular/common';
-import { LoginRequest } from '../data/DataTypes';
+import { LoginRequest, LoginResponse } from '../data/DataTypes';
 
 @Component({
   selector: 'app-login',
@@ -54,14 +54,21 @@ export class LoginComponent {
     this.loginDto.password = this.loginForm.get('Password')?.value;
 
     try {
-      const response = await this.apiService.login(this.loginDto).toPromise();
-      if (response && response.accessToken) {
-        this.proccessing = false;
-        this.router.navigate(['/chat']);
-      } else {
-        console.error('Login failed', response.message);
-        this.proccessing = false;
-      }
+      this.apiService.login(this.loginDto).subscribe({
+        next: (response: LoginResponse) => {
+          if(response.accessToken){
+            this.apiService.saveAccessToken(response.accessToken);
+            this.proccessing = false;
+            this.router.navigate(['/chat']);
+          }else{
+            this.proccessing = false;
+            throw new Error("Login error");
+          }
+        },
+        error: (error: Error) => {
+          this.apiService.handleError(error);
+        }
+      });
     } catch (error) {
       console.error('An error occurred during login', error);
     }

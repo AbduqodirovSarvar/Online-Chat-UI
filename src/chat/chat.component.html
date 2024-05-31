@@ -1,89 +1,120 @@
 <div class="main_page">
-
   <!-- start navbar section -->
 
   <div class="navbar">
-        <!-- start navbar menu section -->
-        <div class="menu">
-            <div class="item-top">
-              <img src="../assets/images/cropped-IMG_2512 (2).JPG" alt="img" style="width: 50px; margin-top: 5px">
-              <!-- <div class="item">
+    <!-- start navbar menu section -->
+    <div class="menu">
+      <div class="item-top">
+        <img
+          src="../assets/images/cropped-IMG_2512 (2).JPG"
+          alt="img"
+          style="width: 50px; margin-top: 5px"
+        />
+        <!-- <div class="item">
 
               </div> -->
-            </div>
-            <div class="item-bottom">
-              <div class="item">
-                <mat-icon>settings</mat-icon>
-              </div>
-              <div class="item" (click)="logOut()">
-                <mat-icon>login</mat-icon>
-              </div>
-            </div>
+      </div>
+      <div class="item-bottom">
+        <div class="item">
+          <mat-icon>settings</mat-icon>
         </div>
-
-        <!-- end navbar menu section  -->
-
-        <!--  start discussion section -->
-
-        <div class="discussions">
-          <div class="discussions_header" [formGroup]="chatForm">
-            <input type="text" placeholder="Search..." formControlName="searchText" (change)="getUsers()"/>
-          </div>
-          <div class="discussions_users">
-            <mat-list *ngFor="let u of users">
-              <mat-list-item
-               (click)="chooseUser(u.id)"
-               >
-                <img src="../assets/images/cropped-IMG_2512 (2).JPG" alt="img" style="margin-right: 20px;">
-                 {{u.firstName}}
-              </mat-list-item>
-              <mat-divider></mat-divider>
-            </mat-list>
-          </div>
+        <div class="item" (click)="logOut()">
+          <mat-icon>login</mat-icon>
         </div>
+      </div>
+    </div>
 
-        <!-- end discussion section -->
+    <!-- end navbar menu section  -->
 
+    <!--  start discussion section -->
+
+    <div class="discussions">
+      <div class="discussions_header" [formGroup]="chatForm">
+        <input
+          type="text"
+          placeholder="Search..."
+          formControlName="searchText"
+        />
+      </div>
+      <div class="discussions_users">
+        <mat-list *ngFor="let u of users" style="display: column">
+          <div style="display: flex">
+            <mat-list-item (click)="chooseUser(u.id)">
+              <img
+                src="../assets/images/cropped-IMG_2512 (2).JPG"
+                alt="img"
+                style="margin-right: 20px"
+              />
+              {{ u.firstName }}
+            </mat-list-item>
+            <div
+              *ngIf="u.unReadedMessageCount > 0"
+              style="
+                margin-top: 20px;
+                background-color: rgb(0, 191, 255);
+                border-radius: 50px;
+                width: 30px;
+                height: 25px;
+                display:flex;
+                align-items: center;
+                justify-content: center;
+              "
+            >
+              {{ u.unReadedMessageCount }}
+            </div>
+          </div>
+
+          <mat-divider></mat-divider>
+        </mat-list>
+      </div>
+    </div>
+
+    <!-- end discussion section -->
   </div>
 
   <!-- end navbar section -->
 
   <!-- start chat section -->
 
-    <div class="chats">
-        <div class="chat_header">
-          <div class="chat_header_item">
-            <img src="../assets/images/cropped-IMG_2512 (2).JPG" alt="user image" style="width: 50px; border-radius: 100%;">
-            <h3 style="margin: 10px 10px 10px 20px;">{{user.firstName}} {{user.lastName}}</h3>
-          </div>
-        </div>
-        <div class="messages">
-          <div class="message" *ngFor="let item of messages">
-            <div *ngIf="item.senderId == user?.id; else notDivisible">
-              <p class="message_rigt">
-                {{item.msg}}
-              </p>
-            </div>
-            <ng-template #notDivisible>
-              <p class="message_left">
-                {{item.msg}}
-              </p>
-            </ng-template>
-          </div>
-        </div>
-        <div class="chat_footer" [formGroup]="chatForm">
-          <input
-            type="text"
-            placeholder="Write your message..."
-            formControlName="message"
-            (keydown)="handleKeydown($event)"
-          />
-          <div class="send_message" (click)="sendMessage()">
-            <mat-icon>telegram</mat-icon>
-          </div>
-        </div>
+  <div class="chats">
+    <div class="chat_header">
+      <div class="chat_header_item">
+        <img
+          src="../assets/images/cropped-IMG_2512 (2).JPG"
+          alt="user image"
+          style="width: 50px; border-radius: 100%"
+        />
+        <h3 style="margin: 10px 10px 10px 20px">
+          {{ user.firstName }} {{ user.lastName }}
+        </h3>
+      </div>
     </div>
+    <div class="messages">
+      <div class="message" *ngFor="let item of messages">
+        <div *ngIf="item.senderId != user?.id; else receiver">
+          <p class="message_rigt">
+            {{ item.msg }}
+          </p>
+        </div>
+        <ng-template #receiver>
+          <p class="message_left">
+            {{ item.msg }}
+          </p>
+        </ng-template>
+      </div>
+    </div>
+    <div class="chat_footer" [formGroup]="chatForm">
+      <input
+        type="text"
+        placeholder="Write your message..."
+        formControlName="message"
+        (keydown)="handleKeydown($event)"
+      />
+      <div class="send_message" (click)="sendMessage()">
+        <mat-icon>telegram</mat-icon>
+      </div>
+    </div>
+  </div>
 
   <!-- end chat section -->
-
 </div>

@@ -2,12 +2,12 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ApiService } from '../services/api.service';
-import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
-import {MatProgressBarModule} from '@angular/material/progress-bar';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { CommonModule } from '@angular/common';
 import {
    RegisterRequest,
-   SendConfirmationCodeRequest 
+   SendConfirmationCodeRequest
   } from '../data/DataTypes';
 
 @Component({
@@ -15,13 +15,11 @@ import {
   standalone: true,
   imports: [FormsModule, ReactiveFormsModule, MatProgressSpinnerModule, MatProgressBarModule, CommonModule],
   templateUrl: './register.component.html',
-  styleUrl: './register.component.scss'
+  styleUrls: ['./register.component.scss']
 })
 export class RegisterComponent {
 
-  constructor(
-    private apiService: ApiService
-  ){}
+  constructor(private apiService: ApiService) { }
 
   registerForm: FormGroup = new FormGroup({
     FirstName: new FormControl(null, {
@@ -30,16 +28,16 @@ export class RegisterComponent {
     LastName: new FormControl(null, {
       validators: [Validators.required]
     }),
-    Email:  new FormControl(null, {
+    Email: new FormControl(null, {
       validators: [Validators.required, Validators.email]
     }),
-    ConfirmCode:  new FormControl(null, {
+    ConfirmCode: new FormControl(null, {
       validators: [Validators.required]
     }),
-    Password:  new FormControl(null, {
+    Password: new FormControl(null, {
       validators: [Validators.required]
     }),
-    ConfirmPassword:  new FormControl(null, {
+    ConfirmPassword: new FormControl(null, {
       validators: [Validators.required]
     }),
     Photo: new FormControl<File | null>(null)
@@ -51,11 +49,11 @@ export class RegisterComponent {
     Email: '',
     ConfirmCode: '',
     Password: '',
-    ConfirmPassword:'',
+    ConfirmPassword: '',
     Photo: null
   };
 
-  proccessing: boolean = false;
+  processing: boolean = false;
 
   sendConfirmCodeDto: SendConfirmationCodeRequest = {
     email: ''
@@ -76,41 +74,36 @@ export class RegisterComponent {
       this.registerDto.Photo = this.registerForm.get("Photo")?.value;
     }
 
-    this.apiService.register(this.registerDto)
-      .subscribe(
-        (response) => {
-          console.log('Response:', response);
-          this.apiService.redirectToLoginPage();
-        },
-        (error) => {
-          console.error('Error:', error);
-        }
-      );
+    try {
+      const response = await this.apiService.register(this.registerDto);
+      console.log('Response:', response);
+      this.apiService.redirectToLoginPage();
+    } catch (error) {
+      console.error('Error:', error);
+    }
   }
 
-  async sendConfirmCode(){
-    if(!this.registerForm.get('Email')?.value){
+
+  async sendConfirmCode() {
+    if (!this.registerForm.get('Email')?.value) {
       return;
     }
-    this.proccessing = true;
+    this.processing = true;
     this.sendConfirmCodeDto.email = this.registerForm.get('Email')?.value;
     console.log(this.sendConfirmCodeDto);
-    this.apiService.sendConfirmationCode(this.sendConfirmCodeDto)
-      .subscribe(
-        (response) => {
-          console.log('Response:', response);
-          this.proccessing = false;
-        },
-        (error) => {
-          this.proccessing = false;
-          console.error("Error", error.message);
-        }
-      );
+    try {
+      const response = await this.apiService.sendConfirmationCode(this.sendConfirmCodeDto);
+      console.log('Response:', response);
+      this.processing = false;
+    } catch (error) {
+      this.processing = false;
+      console.error("Error", error);
     }
+  }
 
   onFileSelected(event: any) {
     const selectedFile = event.target.files[0];
-    if(selectedFile){
+    if (selectedFile) {
       this.registerForm.get('Photo')?.setValue(selectedFile);
     }
   }

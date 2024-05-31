@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ApiService } from '../services/api.service';
-import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { CommonModule } from '@angular/common';
 import { ResetPasswordRequest } from '../data/DataTypes';
 
@@ -30,18 +30,16 @@ export class ResetComponent {
     }),
   });
 
-  proccessing: boolean = false;
+  processing: boolean = false;
 
-  resetPasswordDto: ResetPasswordRequest ={
+  resetPasswordDto: ResetPasswordRequest = {
     email: '',
     newPassword: '',
     confirmNewPassword: '',
     confirmationCode: 0
   };
 
-  constructor(
-    private apiService: ApiService
-  ){}
+  constructor(private apiService: ApiService) { }
 
   async clickResetPassword() {
     if (this.resetForm.invalid) {
@@ -53,34 +51,32 @@ export class ResetComponent {
     this.resetPasswordDto.confirmNewPassword = this.resetForm.get('ConfirmNewPassword')?.value;
 
     try {
-      const response = await this.apiService.resetPassword(this.resetPasswordDto).toPromise();
+      const response = await this.apiService.resetPassword(this.resetPasswordDto);
       if (response) {
         this.apiService.redirectToLoginPage();
       } else {
-        console.error('Reset password failed', response.message);
+        console.error('Reset password failed');
       }
     } catch (error) {
       console.error('An error occurred during password reset', error);
     }
   }
 
-  sendResetCode() {
-    if(!this.resetForm.get('Email')?.value){
+  async sendResetCode() {
+    if (!this.resetForm.get('Email')?.value) {
       return;
     }
-    this.proccessing = true;
+    this.processing = true;
     this.resetPasswordDto.email = this.resetForm.get('Email')?.value;
-    if (this.resetPasswordDto.email) {
-      this.apiService.sendResetConfirmationCode({ email: this.resetPasswordDto.email }).subscribe(
-        () =>{
-          this.proccessing = false;
-          console.log('Reset code sent')
-        },
-        (error) => {
-          this.proccessing = false;
-          console.error('Failed to send reset code', error);
-        }
-      );
+    try {
+      if (this.resetPasswordDto.email) {
+        await this.apiService.sendResetConfirmationCode({ email: this.resetPasswordDto.email });
+        this.processing = false;
+        console.log('Reset code sent');
+      }
+    } catch (error) {
+      this.processing = false;
+      console.error('Failed to send reset code', error);
     }
   }
 }
