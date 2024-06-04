@@ -12,25 +12,31 @@ export class SignalRService {
 
   constructor(
     private apiService: ApiService
-  ) { }
+  ) {
+    this.hubConnection = this.buildConnection();
+    this.registerOnServerEvents();
+  }
 
-  public startConnection(): void {
-    this.hubConnection = new signalR.HubConnectionBuilder()
+  private buildConnection(): signalR.HubConnection {
+    return new signalR.HubConnectionBuilder()
       .withUrl("http://localhost:5038/chat", {
         accessTokenFactory: () => `${this.apiService.getAccessToken()}`
       })
       .configureLogging(signalR.LogLevel.Information)
       .build();
-    this.hubConnection.start()
+  }
+
+  public startConnection(): void {
+    this.hubConnection
+      .start()
       .then(() => console.log('SignalR connection started'))
       .catch(err => console.error('Error while starting SignalR connection:', err));
   }
 
-
   public async sendMessage(toUserId: string, message: string): Promise<void> {
-    if (this.hubConnection.state === 'Connected') {
+    if (this.hubConnection.state === signalR.HubConnectionState.Connected) {
       try {
-        return await this.hubConnection.invoke('SendMessage', toUserId, message);
+        await this.hubConnection.invoke('SendMessage', toUserId, message);
       } catch (err) {
         console.error('Error while sending message: ' + err);
         throw err;
@@ -44,8 +50,14 @@ export class SignalRService {
     return this.messageSubject.asObservable();
   }
 
+  private registerOnServerEvents(): void {
+    this.hubConnection.on('ReceiveMessage', (fromUserId: string, message: string) => {
+      this.messageSubject.next({ fromUserId, message });
+    });
+  }
+
   public stopConnection(): void {
-    if (this.hubConnection && this.hubConnection.state === 'Connected') {
+    if (this.hubConnection && this.hubConnection.state === signalR.HubConnectionState.Connected) {
       this.hubConnection.stop()
         .then(() => console.log('SignalR connection stopped'))
         .catch(err => console.error('Error while stopping SignalR connection:', err));

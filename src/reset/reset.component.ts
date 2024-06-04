@@ -41,17 +41,14 @@ export class ResetComponent {
     const passwordErrors: ValidationErrors = {};
 
     if (newPassword) {
-      // Check for required fields
       if (!confirmNewPassword) {
         passwordErrors['confirmPasswordRequired'] = true;
       }
 
-      // Check for strong password
       if (!this.apiService.checkForStrongPassword(newPassword)) {
         passwordErrors['weakPassword'] = true;
       }
 
-      // Check if passwords match
       if (confirmNewPassword && newPassword !== confirmNewPassword) {
         passwordErrors['passwordsMismatch'] = true;
       }
@@ -99,6 +96,7 @@ export class ResetComponent {
           this.processing = false;
         },
         error: (error: Error) => {
+          this.processing = false;
           this.apiService.handleError(error);
         }
       });

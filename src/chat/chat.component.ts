@@ -42,7 +42,7 @@ export class ChatComponent implements OnInit {
   user: User = {} as User;
   messages: Message[] = [];
   messageSubscription!: Subscription;
-  storageAp: string = "http://localhost:5038/api/Storage";
+  storageApi: string = "http://localhost:5038/api/Storage";
 
   chatForm: FormGroup = new FormGroup({
     message: new FormControl('', Validators.required),
@@ -84,15 +84,14 @@ export class ChatComponent implements OnInit {
   }
 
   private loadCurrentUser(): Promise<void> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       this.apiService.getCurrentUser().subscribe({
         next: (user: User) => {
           this.currentUser = user;
           resolve();
         },
         error: (error) => {
-          console.error('Error fetching current user:', error);
-          reject(error);
+          this.apiService.handleError(error);
         }
       });
     });
@@ -103,7 +102,6 @@ export class ChatComponent implements OnInit {
       this.apiService.getAllChatUsers().subscribe({
         next: (users: User[]) => {
           this.users = users;
-          console.log(this.users);
           resolve();
         },
         error: (error) => {
@@ -185,13 +183,20 @@ export class ChatComponent implements OnInit {
     this.signalRService.stopConnection();
   }
 
+  getImageUrl(user: User) : string {
+    return user.photoName ? `${this.storageApi}/${user.photoName}` : '../assets/icons/user-avatar.png';
+  }
+
+  onImageError(){
+
+  }
+
   private setupSignalRConnection(): void {
     this.signalRService.startConnection();
     this.signalRService.getMessageObservable().subscribe({
-      next: ({ fromUserId, message }) => {
+      next: () => {
         this.loadAllChatUsers();
         this.chooseUser(this.user.id);
-        console.log(`From User: ${fromUserId}\nMessage: ${message}`);
       },
       error: (error) => {
         console.error('Error receiving message:', error);

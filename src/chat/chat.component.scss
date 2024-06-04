@@ -127,29 +127,27 @@ input{
   max-width: 80%;
 }
 
-.messages .message_rigt{
+.messages .sent-messages{
   float: right;
   align-self: flex-end;
   width: 40%;
-  height: 60px;
   align-items: center;
   text-align: right;
   margin-right: 10px;
   border-radius: 10px;
-  background-color:deepskyblue;
+  background-color:rgb(226, 228, 228);
   margin-bottom: 5px;
 }
 
-.messages .message_left{
+.messages .received-messages{
   float: left;
   align-self: flex-start;
   width: 40%;
-  height: 60px;
   align-items: center;
   text-align: left;
   margin-left: 10px;
   border-radius: 10px;
-  background-color:deepskyblue;
+  background-color:rgb(255, 255, 255);
   margin-bottom: 5px;
 }
 

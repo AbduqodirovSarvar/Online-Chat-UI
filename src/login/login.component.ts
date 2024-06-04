@@ -57,8 +57,8 @@ export class LoginComponent {
       this.apiService.login(this.loginDto).subscribe({
         next: (response: LoginResponse) => {
           if(response.accessToken){
-            this.apiService.saveAccessToken(response.accessToken);
             this.proccessing = false;
+            this.apiService.saveAccessToken(response.accessToken);
             this.router.navigate(['/chat']);
           }else{
             this.proccessing = false;
@@ -66,6 +66,7 @@ export class LoginComponent {
           }
         },
         error: (error: Error) => {
+          this.proccessing = false;
           this.apiService.handleError(error);
         }
       });

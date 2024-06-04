@@ -16,6 +16,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatButtonModule } from '@angular/material/button';
 import { ApiService } from '../services/api.service';
 import { CommonModule } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-user-settings-dialog',
@@ -33,6 +34,7 @@ import { CommonModule } from '@angular/common';
     MatButtonModule,
     MatDialogModule,
     CommonModule,
+    MatIconModule
   ],
   templateUrl: './user-settings-dialog.component.html',
   styleUrls: ['./user-settings-dialog.component.scss'],
@@ -55,6 +57,7 @@ export class UserSettingsDialogComponent {
   updateUserForm: FormGroup;
   changingPassword: boolean = false;
   currentUser: User = {} as User;
+  storageApi: string = "http://localhost:5038/api/Storage";
 
   constructor(
     private apiService: ApiService,
@@ -150,6 +153,7 @@ export class UserSettingsDialogComponent {
 
   onClickDeleteAccount() {
     if(confirm("Are you sure about delete your account?\nYou can't reverce this procces!")){
+      console.log("YESSSSSSSS");
       this.apiService.deleteUser(this.currentUser.id).subscribe({
         next: () => {
           this.dialog.closeAll();
@@ -163,6 +167,10 @@ export class UserSettingsDialogComponent {
     else{
       this.dialog.closeAll();
     }
+  }
+
+  getImageUrl() : string {
+    return this.currentUser.photoName ? `${this.storageApi}/${this.currentUser.photoName}` : '../assets/icons/user-avatar.png';
   }
 
   onFileSelected(event: any) {

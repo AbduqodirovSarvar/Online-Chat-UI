@@ -136,8 +136,10 @@ export class ApiService {
       'Authorization': `Bearer ${this.getAccessToken()}`,
       'Accept': 'application/json'
     });
-
-    return this.http.delete<any>(`${userApi}/${userId}`, { headers });
+    const body = {
+      "id": userId
+    }
+    return this.http.delete<any>(`${userApi}`, { headers: headers, body: body });
   }
 
   deleteUserPhoto(userId: string): Observable<any> {
@@ -146,7 +148,7 @@ export class ApiService {
       'Accept': 'application/json'
     });
 
-    return this.http.delete<any>(`${userApi}/photo/${userId}`, { headers });
+    return this.http.delete<any>(`${userApi}/photo/${userId}`, { headers: headers });
   }
 
   // --> end User services
@@ -177,7 +179,6 @@ export class ApiService {
 
   handleError(error: any): never {
     if (error.status === 401) {
-      // Unauthorized error, redirect to login page
       this.redirectToLoginPage();
     }
     console.error('An error occurred:', error);
@@ -185,7 +186,7 @@ export class ApiService {
   }
 
   checkForStrongPassword(password: string){
-    const strongPasswordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    const strongPasswordPattern = /(?=^.{8,}$)((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/;  //  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
     return strongPasswordPattern.test(password);
   }
 

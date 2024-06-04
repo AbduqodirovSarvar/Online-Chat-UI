@@ -11,7 +11,7 @@
                 <input type="password" placeholder="New Password" formControlName="NewPassword" required="true"/>
                 <input type="password" placeholder="Confirm the new password" formControlName="ConfirmNewPassword" required="true"/>
                 <mat-spinner *ngIf="processing"></mat-spinner>
-                <button class="opacity" [disabled]="resetForm.invalid" (click)="clickResetPassword()">Reset Password</button>
+                <button class="opacity" [disabled]="!resetForm.valid" (click)="clickResetPassword()">Reset Password</button>
             </form>
         </div>
         <div class="circle circle-two"></div>

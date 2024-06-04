@@ -5,11 +5,13 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { CommonModule } from '@angular/common';
 import { RegisterRequest, SendConfirmationCodeRequest } from '../data/DataTypes';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [FormsModule, ReactiveFormsModule, MatProgressSpinnerModule, MatProgressBarModule, CommonModule],
+  imports: [ReactiveFormsModule, MatProgressSpinnerModule, MatProgressBarModule, CommonModule,MatFormFieldModule, MatInputModule],
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.scss']
 })
@@ -51,18 +53,12 @@ export class RegisterComponent {
 
     const passwordErrors: ValidationErrors = {};
 
-    if (password) {
-      // Check for required fields
-      if (!confirmPassword) {
-        passwordErrors['confirmPasswordRequired'] = true;
-      }
-
+    if (password && confirmPassword) {
       if (!this.apiService.checkForStrongPassword(password)) {
         passwordErrors['weakPassword'] = true;
       }
 
-      // Check if passwords match
-      if (confirmPassword && password !== confirmPassword) {
+      if (confirmPassword && password != confirmPassword) {
         passwordErrors['passwordsMismatch'] = true;
       }
     }
@@ -71,6 +67,7 @@ export class RegisterComponent {
   };
 
   async clickRegister() {
+    console.log("clicked");
     if (this.registerForm.invalid) {
       return;
     }
@@ -105,13 +102,13 @@ export class RegisterComponent {
     }
     this.processing = true;
     this.sendConfirmCodeDto.email = this.registerForm.get('Email')?.value;
-    console.log(this.sendConfirmCodeDto);
     try {
       this.apiService.sendConfirmationCode(this.sendConfirmCodeDto).subscribe({
         next: () => {
           this.processing = false;
         },
         error: (error: Error) => {
+          this.processing = false;
           this.apiService.handleError(error);
         }
       });
