@@ -42,7 +42,7 @@ export class ChatComponent implements OnInit {
   user: User = {} as User;
   messages: Message[] = [];
   messageSubscription!: Subscription;
-  storageApi: string = "http://localhost:5038/api/Storage";
+  storageApi: string = "http://45.130.148.137:8081/api/Storage";
 
   chatForm: FormGroup = new FormGroup({
     message: new FormControl('', Validators.required),

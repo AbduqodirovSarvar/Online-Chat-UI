@@ -4,11 +4,11 @@ import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { User, RegisterRequest, LoginRequest, LoginResponse, ResetPasswordRequest, ChangePasswordRequest, SendConfirmationCodeRequest, MarkAsReadRequest, UpdateUserRequest } from '../data/DataTypes';
 
-const commonApi: string = "http://localhost:5038/api";
-const authApi: string = "http://localhost:5038/api/Auth";
-const messageApi: string = "http://localhost:5038/api/Message";
-const userApi: string = "http://localhost:5038/api/User";
-const storageApi: string = "http://localhost:5038/api/Storage";
+const commonApi: string = "http://45.130.148.137:8081/api";
+const authApi: string = "http://45.130.148.137:8081/api/Auth";
+const messageApi: string = "http://45.130.148.137:8081/Message";
+const userApi: string = "http://45.130.148.137:8081/api/User";
+const storageApi: string = "http://45.130.148.137:8081/api/Storage";
 
 @Injectable({
   providedIn: 'root'

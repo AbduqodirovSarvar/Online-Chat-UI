@@ -57,7 +57,7 @@ export class UserSettingsDialogComponent {
   updateUserForm: FormGroup;
   changingPassword: boolean = false;
   currentUser: User = {} as User;
-  storageApi: string = "http://localhost:5038/api/Storage";
+  storageApi: string = "http://45.130.148.137:8081/api/Storage";
 
   constructor(
     private apiService: ApiService,
