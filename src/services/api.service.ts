@@ -4,17 +4,17 @@ import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { User, RegisterRequest, LoginRequest, LoginResponse, ResetPasswordRequest, ChangePasswordRequest, SendConfirmationCodeRequest, MarkAsReadRequest, UpdateUserRequest } from '../data/DataTypes';
 
-// const commonApi: string = "https://safety-chat.api.sarvarbekabduqodirov.uz:4443/api";
-// const authApi: string = "https://safety-chat.api.sarvarbekabduqodirov.uz:4443/api/Auth";
-// const messageApi: string = "https://safety-chat.api.sarvarbekabduqodirov.uz:4443/api/Message";
-// const userApi: string = "https://safety-chat.api.sarvarbekabduqodirov.uz:4443/api/User";
-// const storageApi: string = "https://safety-chat.api.sarvarbekabduqodirov.uz:4443/api/Storage";
+const commonApi: string = "https://safety-chat.api.sarvarbekabduqodirov.uz:4443/api";
+const authApi: string = "https://safety-chat.api.sarvarbekabduqodirov.uz:4443/api/Auth";
+const messageApi: string = "https://safety-chat.api.sarvarbekabduqodirov.uz:4443/api/Message";
+const userApi: string = "https://safety-chat.api.sarvarbekabduqodirov.uz:4443/api/User";
+const storageApi: string = "https://safety-chat.api.sarvarbekabduqodirov.uz:4443/api/Storage";
 
-const commonApi: string = "http://localhost:5038/api";
-const authApi: string = "http://localhost:5038/api/Auth";
-const messageApi: string = "http://localhost:5038/api/Message";
-const userApi: string = "http://localhost:5038/api/User";
-const storageApi: string = "http://localhost:5038/api/Storage";
+// const commonApi: string = "http://localhost:5038/api";
+// const authApi: string = "http://localhost:5038/api/Auth";
+// const messageApi: string = "http://localhost:5038/api/Message";
+// const userApi: string = "http://localhost:5038/api/User";
+// const storageApi: string = "http://localhost:5038/api/Storage";
 
 @Injectable({
   providedIn: 'root'
