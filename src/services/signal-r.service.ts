@@ -19,7 +19,7 @@ export class SignalRService {
 
   private buildConnection(): signalR.HubConnection {
     return new signalR.HubConnectionBuilder()
-      .withUrl("http://45.130.148.137:8081/chat", {
+      .withUrl("http://localhost:5038/chat", {
         accessTokenFactory: () => `${this.apiService.getAccessToken()}`
       })
       .configureLogging(signalR.LogLevel.Information)

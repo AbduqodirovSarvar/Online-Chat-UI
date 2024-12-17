@@ -42,7 +42,7 @@ export class ChatComponent implements OnInit {
   user: User = {} as User;
   messages: Message[] = [];
   messageSubscription!: Subscription;
-  storageApi: string = "http://45.130.148.137:8081/api/Storage";
+  storageApi: string = "https://safety-chat.api.sarvarbekabduqodirov.uz:4443/api/Storage";
 
   chatForm: FormGroup = new FormGroup({
     message: new FormControl('', Validators.required),
@@ -64,7 +64,7 @@ export class ChatComponent implements OnInit {
     await this.loadCurrentUser();
     await this.loadAllChatUsers();
     if (this.users.length > 0) {
-      await this.chooseUser(this.users[0].id);
+      await this.chooseUser(this.users[0]);
     }
     this.setupSearchTextHandler();
     this.setupSignalRConnection();
@@ -75,7 +75,7 @@ export class ChatComponent implements OnInit {
       next: async () => {
         await this.loadCurrentUser();
         await this.loadAllChatUsers();
-        await this.chooseUser(this.user.id);
+        await this.chooseUser(this.user);
       },
       error: (error: Error) => {
         this.apiService.handleError(error);
@@ -112,13 +112,13 @@ export class ChatComponent implements OnInit {
     });
   }
 
-  async chooseUser(userId: string): Promise<void> {
-    this.apiService.markAsRead(userId).subscribe({
+  async chooseUser(user: User): Promise<void> {
+    this.apiService.markAsRead(user.id).subscribe({
       next: () => {
-        this.apiService.getUser(userId, null).subscribe({
+        this.apiService.getUser(user.id, null).subscribe({
           next: (user: User) => {
             this.user = user;
-            this.messages = user.messages;
+            // this.messages = user.messages;
             this.chatForm.get('searchText')?.setValue('');
           },
           error: (error) => {
@@ -128,6 +128,15 @@ export class ChatComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error marking messages as read:', error);
+      }
+    });
+    
+    this.apiService.getAllMessagesForTheChat(user.id).subscribe({
+      next: (item: any) => {
+        this.messages = item.messages;
+      },
+      error: (error) => {
+        console.error('Error fetching messages:', error);
       }
     });
   }
@@ -164,7 +173,7 @@ export class ChatComponent implements OnInit {
 
     this.signalRService.sendMessage(this.user.id, messageContent).then(() => {
       this.loadAllChatUsers();
-      this.chooseUser(this.user.id);
+      this.chooseUser(this.user);
       this.chatForm.get('message')?.setValue('');
     }).catch(error => {
       console.error('Error sending message:', error);
@@ -196,7 +205,7 @@ export class ChatComponent implements OnInit {
     this.signalRService.getMessageObservable().subscribe({
       next: () => {
         this.loadAllChatUsers();
-        this.chooseUser(this.user.id);
+        this.chooseUser(this.user);
       },
       error: (error) => {
         console.error('Error receiving message:', error);

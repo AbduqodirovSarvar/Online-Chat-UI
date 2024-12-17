@@ -4,11 +4,17 @@ import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { User, RegisterRequest, LoginRequest, LoginResponse, ResetPasswordRequest, ChangePasswordRequest, SendConfirmationCodeRequest, MarkAsReadRequest, UpdateUserRequest } from '../data/DataTypes';
 
-const commonApi: string = "http://45.130.148.137:8081/api";
-const authApi: string = "http://45.130.148.137:8081/api/Auth";
-const messageApi: string = "http://45.130.148.137:8081/Message";
-const userApi: string = "http://45.130.148.137:8081/api/User";
-const storageApi: string = "http://45.130.148.137:8081/api/Storage";
+// const commonApi: string = "https://safety-chat.api.sarvarbekabduqodirov.uz:4443/api";
+// const authApi: string = "https://safety-chat.api.sarvarbekabduqodirov.uz:4443/api/Auth";
+// const messageApi: string = "https://safety-chat.api.sarvarbekabduqodirov.uz:4443/api/Message";
+// const userApi: string = "https://safety-chat.api.sarvarbekabduqodirov.uz:4443/api/User";
+// const storageApi: string = "https://safety-chat.api.sarvarbekabduqodirov.uz:4443/api/Storage";
+
+const commonApi: string = "http://localhost:5038/api";
+const authApi: string = "http://localhost:5038/api/Auth";
+const messageApi: string = "http://localhost:5038/api/Message";
+const userApi: string = "http://localhost:5038/api/User";
+const storageApi: string = "http://localhost:5038/api/Storage";
 
 @Injectable({
   providedIn: 'root'
@@ -41,11 +47,11 @@ export class ApiService {
   }
 
   sendConfirmationCode(sendConfirmationCode: SendConfirmationCodeRequest): Observable<any> {
-    return this.http.post<any>(`${authApi}/send-confirmation-code-for-check-email`, sendConfirmationCode);
+    return this.http.post<any>(`${authApi}/send-confirmation-code-to-verify-email`, sendConfirmationCode);
   }
 
   sendResetConfirmationCode(sendConfirmationCode: SendConfirmationCodeRequest): Observable<any> {
-    return this.http.post<any>(`${authApi}/send-confirmation-code-for-reset-password`, sendConfirmationCode);
+    return this.http.post<any>(`${authApi}/send-confirmation-code-for-password-reset`, sendConfirmationCode);
   }
 
   resetPassword(resetPasswordDto: ResetPasswordRequest): Observable<any> {
@@ -107,7 +113,7 @@ export class ApiService {
       'Accept': 'application/json'
     });
 
-    return this.http.get<any>(`${userApi}/chat-messages/${userId}`, { headers });
+    return this.http.get<any>(`${userApi}/chat-messages?UserId=${userId}`, { headers });
   }
 
   editUser(userUpdateDto: UpdateUserRequest): Observable<any> {

@@ -40,7 +40,7 @@
       <div class="discussions_users">
         <mat-list *ngFor="let u of users" style="display: column">
           <div style="display: flex">
-            <mat-list-item (click)="chooseUser(u.id)">
+            <mat-list-item (click)="chooseUser(u)">
               <img
                 [src]="getImageUrl(u)" alt="img"
                 style="margin-right: 20px"
